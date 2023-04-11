@@ -6,11 +6,16 @@ from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import BadHeaderError, send_mail
 from django.db.models import Q
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,reverse
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+
+
+
+from .forms import RegisterForm
+
 def password_reset_request(request):
     if request.method == "POST":
         domain = request.headers['Host']
@@ -43,3 +48,15 @@ def password_reset_request(request):
     password_reset_form = PasswordResetForm()
     return render(request=request, template_name="registration/password_reset_form.html",
                   context={"form": password_reset_form})
+
+
+# Create your views here.
+def user_register(response):
+    if response.method == "POST":
+        form = RegisterForm(response.POST)
+        if form.is_valid():
+            form.save()
+        return redirect(reverse('login'))
+    else:
+        form = RegisterForm()
+    return render(response, "registration/register.html", {"form":form})
